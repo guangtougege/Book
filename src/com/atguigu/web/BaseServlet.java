@@ -25,6 +25,7 @@ public abstract class BaseServlet extends HttpServlet {
         req.setCharacterEncoding("UTF-8");
         resp.setContentType("text/html; charset=UTF-8");
 
+
         String action = req.getParameter("action");
 
         try {

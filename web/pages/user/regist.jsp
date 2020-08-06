@@ -11,6 +11,21 @@
     <script type="text/javascript">
         //页面加载完成之后
         $(function () {
+
+            $("#username").blur(function () {
+                //1.获取用户名
+                var username = this.value;
+                //2.发起ajax请求
+                $.getJSON("http://localhost:8080/书城EBook/userServlet","action=ajaxExistsUsername&usernmae=" + username,callback);
+                    if (data.existsUsername){
+                        $("span.errorMsg").text("用户名已存在!");
+                    }else {
+                        $("span.errorMsg").text("用户名可用!");
+
+                    }
+
+            });
+
                 //给验证码图片绑定单机事件
             $("#code_img").click(function () {
                 this.src = "${basePath}/kaptcha.jpg";

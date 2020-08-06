@@ -3,6 +3,7 @@ package com.atguigu.web;
 import com.atguigu.bean.User;
 import com.atguigu.service.UserService;
 import com.atguigu.service.impl.UserServiceImpl;
+import com.google.gson.Gson;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -10,6 +11,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.Map;
 
 import static com.google.code.kaptcha.Constants.KAPTCHA_SESSION_KEY;
 
@@ -123,8 +126,29 @@ public class UserServlet extends BaseServlet {
         }
     }
 
+    /**
+     * ajax请求
+     * @param req
+     * @param resp
+     * @throws ServletException
+     * @throws IOException
+     */
+    protected void ajaxExistsUsername(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        //1.获取请求的参数username
+        String username = req.getParameter("username");
+        //调用方法
+        boolean existsUsername = userService.existsUsername(username);
+        //把放回的结果封装为map对象
+        Map<String, Object> resulMap = new HashMap<>();
+        resulMap.put("existsUsername", existsUsername);
+        Gson gson = new Gson();
+        String json = gson.toJson(resulMap);
+        resp.getWriter().write(json);
 
-}
+    }
+
+
+    }
 
 
 

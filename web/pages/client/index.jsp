@@ -12,8 +12,15 @@
         $(function () {
             //加入购物车按钮绑定单机时间
             $("button.addToCart").click(function () {
+
                 var bookId = $(this).attr("bookId");
-                location.href="http://localhost:8080/书城Book/cartServlet?action=addItem&id="+bookId;
+                // location.href="http://localhost:8080/书城Book/cartServlet?action=addItem&id="+bookId;
+               $.getJSON("http://localhost:8080/书城Book/cartServlet","action=ajaxAddItem&id=" + bookId,function (data) {
+                    $("#cartTotalCount").text("您的购物车中有" + ${sessionScope.cart.totalCount} + " 件商品");
+                    $("#cartLastName").text(data.lastName);
+               });
+
+
             });
         });
     </SCRIPT>
@@ -54,17 +61,17 @@
         <div style="text-align: center">
             <c:if test="${empty sessionScope.cart.items}">
 <%--                购物车为空输出--%>
-                <span></span>
+                <span id="cartTotalCount"></span>
                 <div>
-                    <span style="color: red">当前购物车为空</span>
+                    <span style="color: red" id="cartLastName" >当前购物车为空</span>
                 </div>
             </c:if>
 
             <c:if test="${not empty sessionScope.cart.items}">
                 <%--购物车非空输出--%>
-                <span>您的购物车中有 ${sessionScope.cart.totalCount} 件商品</span>
+                <span id="cartTotalCount">您的购物车中有 ${sessionScope.cart.totalCount} 件商品</span>
                 <div>
-                    您刚刚将<span style="color: red">${sessionScope.lastName}</span>加入到了购物车中
+                    您刚刚将<span style="color: red" id="cartLastName">${sessionScope.lastName}</span>加入到了购物车中
                 </div>
             </c:if>
 
@@ -107,10 +114,10 @@
         </c:forEach>
         <%--遍历结尾--%>
     </div>
-        
+
 <%--    静态包含分页条--%>
     <%@include file="/pages/common/page_nav.jsp"%>
-    
+
 
 
 </div>
