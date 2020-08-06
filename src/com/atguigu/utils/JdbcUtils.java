@@ -20,6 +20,9 @@ import java.util.Properties;
 public class JdbcUtils {
     //Druid连接池连接数据库 主要方法
     private static DruidDataSource dataSource;
+    //创建一个ThreadLocad使得它在同一个线程的同一个连接下
+    private static ThreadLocal<Connection> conns = new ThreadLocal<Connection>();
+
 
     //初始化,使用静态代码块创建数据库连接池
     static {
@@ -36,7 +39,6 @@ public class JdbcUtils {
         }
     }
 
-
     /**
      * 获取数据库连接池连接
      *
@@ -44,32 +46,84 @@ public class JdbcUtils {
      */
 
     public static Connection getConnection() {
-        Connection conn = null;
+        Connection conn = conns.get();
+        if (conn == null) {
 
-        try {
-            conn = dataSource.getConnection();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return conn;
-    }
-
-    /**
-     * 关闭连接池
-     *
-     * @param conn
-     */
-    public static void close(Connection conn) {
-        if (conn!=null){
             try {
-                conn.close();
-            } catch (SQLException throwables) {
-                throwables.printStackTrace();
+                //第一次连接为空,从数据库连接池里取
+                conn = dataSource.getConnection();
+                //获取后,保存到ThreadLocad对象中,供连接使用
+                conns.set(conn);
+                //设置手动连接管理事务
+                conn.setAutoCommit(false);
+
+            } catch (SQLException e) {
+                e.printStackTrace();
             }
         }
+        return conn;
 
     }
+    /**
+     * 提交事务,并关闭释放连接
+     */
+    public static void conmmitAndClose(){
+        Connection connection = conns.get();
+        //如果不为空,说明之前使用过连接操作数据库
+        if (connection != null) {
+
+            try {
+                //提交事务
+                connection.commit();
+                //同时关闭连接
+                connection.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        //执行remove操作,
+        conns.remove();
+
+    }
+    /**
+     * 回滚事务,并关闭连接
+     */
+    public static void rollbackAndClose() {
+        Connection connection = conns.get();
+        //如果不为空,说明之前使用过连接操作数据库
+        if (connection != null) {
+
+            try {
+                //回滚事务
+                connection.rollback();
+                //同时关闭连接
+                connection.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        //执行remove操作,
+        conns.remove();
+
+    }
+
+
+
+//    /**
+//     * 关闭连接池
+//     *
+//     * @param conn
+//     */
+//    public static void close(Connection conn) {
+//        if (conn != null) {
+//            try {
+//                conn.close();
+//            } catch (SQLException throwables) {
+//                throwables.printStackTrace();
+//            }
+//        }
+//
+//    }
 }
 
 
