@@ -26,6 +26,7 @@ public class TransactionFilter implements Filter {
             //回滚事务
             JdbcUtils.rollbackAndClose();
             e.printStackTrace();
+            throw new RuntimeException(e);
         }
     }
 
